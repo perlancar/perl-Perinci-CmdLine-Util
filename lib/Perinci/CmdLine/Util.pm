@@ -89,6 +89,7 @@ sub detect_perinci_cmdline_script {
 
     my $yesno = 0;
     my $reason = "";
+    my %extra;
 
   DETECT:
     {
@@ -161,6 +162,8 @@ sub detect_perinci_cmdline_script {
                         }
                         $yesno = 1;
                         $reason = "Wrapper script for '$1'";
+                        $extra{'func.is_wrapper'} = 1;
+                        $extra{'func.wrapped'}    = $1;
                         last DETECT;
                     }
                 }
@@ -169,7 +172,7 @@ sub detect_perinci_cmdline_script {
         } # for alt
     }
 
-    [200, "OK", $yesno, {"func.reason"=>$reason}];
+    [200, "OK", $yesno, {"func.reason"=>$reason, %extra}];
 }
 
 1;
