@@ -36,14 +36,42 @@ _
             req => 1,
             pos => 0,
         },
-        filter_x => {
-            summary => 'If on, only consider script that has +x mode bit set',
-            schema  => 'bool*',
-        },
-        exclude_backup => {
-            summary => 'Exclude backup filenames',
+        include_nonexec => {
+            summary => 'Include scripts that do not have +x mode bit set',
             schema  => 'bool*',
             default => 1,
+        },
+        include_backup => {
+            summary => 'Include backup files',
+            schema  => 'bool*',
+            default => 0,
+        },
+        include_wrapper => {
+            summary => 'Include wrapper scripts',
+            description => <<'_',
+
+A wrapper script is another Perl script, a shell script, or some other script
+which wraps a Perinci::CmdLine script. For example, if `list-id-holidays` is a
+Perinci::CmdLine script, then this shell script called `list-id-joint-leaves` is
+a wrapper:
+
+    #!/bin/bash
+    list-id-holidays --is-holiday=0 --is-joint-leave=0 "$@"
+
+It makes sense to provide the same completion for this wrapper script as
+`list-id-holidays`.
+
+To help this function detect such script, you need to put a tag inside the file:
+
+    #!/bin/bash
+    # TAG wrapped=list-id-holidays
+    list-id-holidays --is-holiday=0 --is-joint-leave=0 "$@"
+
+If this option is enabled, these scripts will be included.
+
+_
+            schema  => 'bool*',
+            default => 0,
         },
     },
 };
