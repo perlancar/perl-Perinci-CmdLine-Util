@@ -1,5 +1,17 @@
 Revision history for Perinci-CmdLine-Util
 
+0.02     2014-11-01 (PERLANCAR)
+
+         [INCOMPATIBLE CHANGES]
+
+         - Rename option 'filter_x' to 'include_noexec' to be more consistent
+           with the other 'include_*' options.
+
+         [ENHANCEMENTS]
+
+         - Add options: 'include_backup', 'include_wrapper'.
+
+
 0.01     2014-11-01 (PERLANCAR)
 
          - First release.
