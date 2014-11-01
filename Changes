@@ -1,5 +1,15 @@
 Revision history for Perinci-CmdLine-Util
 
+0.04    2014-11-01 (PERLANCAR)
+
+	[REMOVED FEATURES]
+
+        - Remove options 'include_backup' and 'include_wrapper'. The first one
+          does not really belong in the function and the second one is feature
+          creep and a misconcept. To accomplish wanted feature,
+          App::BashCompletionF will be modified instead.
+
+
 0.03    2014-11-01 (PERLANCAR)
 
 	- Return extra data when detecting wrapper script.
