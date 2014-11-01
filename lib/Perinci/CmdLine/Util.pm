@@ -40,18 +40,28 @@ _
             summary => 'If on, only consider script that has +x mode bit set',
             schema  => 'bool*',
         },
+        exclude_backup => {
+            summary => 'Exclude backup filenames',
+            schema  => 'bool*',
+            default => 1,
+        },
     },
 };
 sub detect_perinci_cmdline_script {
     my %args = @_;
 
     my $script = $args{script} or return [400, "Please specify script"];
+    my $exclude_backup = $args{exclude_backup} // 1;
 
     my $yesno = 0;
     my $reason = "";
 
   DETECT:
     {
+        if ($exclude_backup && $script =~ /(~|\.bak)$/) {
+            $reason = "Backup filename is excluded";
+            last;
+        }
         unless (-f $script) {
             $reason = "Not a file";
             last;
