@@ -30,9 +30,6 @@ The criteria are:
 * either: must be perl script (shebang line contains 'perl') and must contain
   something like `use Perinci::CmdLine`;
 
-* or: a script tagged as a wrapper script and the wrapped script is a
-  Perinci::CmdLine script.
-
 _
     args => {
         script => {
@@ -45,38 +42,6 @@ _
             schema  => 'bool*',
             default => 1,
         },
-        include_backup => {
-            summary => 'Include backup files',
-            schema  => 'bool*',
-            default => 0,
-        },
-        include_wrapper => {
-            summary => 'Include wrapper scripts',
-            description => <<'_',
-
-A wrapper script is another Perl script, a shell script, or some other script
-which wraps a Perinci::CmdLine script. For example, if `list-id-holidays` is a
-Perinci::CmdLine script, then this shell script called `list-id-joint-leaves` is
-a wrapper:
-
-    #!/bin/bash
-    list-id-holidays --is-holiday=0 --is-joint-leave=0 "$@"
-
-It makes sense to provide the same completion for this wrapper script as
-`list-id-holidays`.
-
-To help this function detect such script, you need to put a tag inside the file:
-
-    #!/bin/bash
-    # TAG wrapped=list-id-holidays
-    list-id-holidays --is-holiday=0 --is-joint-leave=0 "$@"
-
-If this option is enabled, these scripts will be included.
-
-_
-            schema  => 'bool*',
-            default => 0,
-        },
     },
 };
 sub detect_perinci_cmdline_script {
@@ -84,24 +49,17 @@ sub detect_perinci_cmdline_script {
 
     my $script = $args{script} or return [400, "Please specify script"];
     my $include_noexec  = $args{include_noexec}  // 1;
-    my $include_backup  = $args{include_backup}  // 0;
-    my $include_wrapper = $args{include_wrapper} // 0;
 
     my $yesno = 0;
     my $reason = "";
-    my %extra;
 
   DETECT:
     {
-        if (!$include_backup && $script =~ /(~|\.bak)$/) {
-            $reason = "Backup filename is excluded";
-            last;
-        }
         unless (-f $script) {
             $reason = "Not a file";
             last;
         };
-        if ($args{filter_x} && !(-x _)) {
+        if (!$include_noexec && !(-x _)) {
             $reason = "Not an executable";
             last;
         }
@@ -116,63 +74,21 @@ sub detect_perinci_cmdline_script {
             last;
         }
         my $shebang = <$fh>;
-
-        for my $alt (1..2) {
-            # detect Perinci::CmdLine script
-            {
-                last unless $alt==1;
-                unless ($shebang =~ /perl/) {
-                    $reason = "Does not have 'perl' in the shebang line";
-                    last;
-                }
-                while (<$fh>) {
-                    if (/^\s*(use|require)\s+Perinci::CmdLine(|::Any|::Lite)/) {
-                        $yesno = 1;
-                        last DETECT;
-                    }
-                }
-                $reason = "Can't find any statement requiring Perinci::CmdLine".
-                    " module family";
+        unless ($shebang =~ /perl/) {
+            $reason = "Does not have 'perl' in the shebang line";
+            last;
+        }
+        while (<$fh>) {
+            if (/^\s*(use|require)\s+Perinci::CmdLine(|::Any|::Lite)/) {
+                $yesno = 1;
+                last DETECT;
             }
-            # detect wrapper script
-          DETECT_WRAPPER:
-            {
-                last unless $alt==2;
-                last unless $include_wrapper;
-                seek $fh, 0, 0;
-                # XXX currently simplistic
-                while (<$fh>) {
-                    if (/^# TAG wrapped=([^=\s]+)\s*$/) {
-                        require File::Which;
-                        my $path = File::Which::which($1);
-                        if (!$path) {
-                            $reason = "Tagged as wrapper but ".
-                                "wrapped program '$1' not found in PATH";
-                            last DETECT_WRAPPER;
-                        }
-                        my $res = detect_perinci_cmdline_script(
-                            script          => $path,
-                            include_backup  => $include_backup,
-                            include_noexec  => $include_noexec,
-                            include_wrapper => 0, # currently not recursive
-                        );
-                        if ($res->[0] != 200 || !$res->[2]) {
-                            $reason = "Tagged as wrapper but wrapped program ".
-                                "'$1' is not a Perinci::CmdLine script";
-                        }
-                        $yesno = 1;
-                        $reason = "Wrapper script for '$1'";
-                        $extra{'func.is_wrapper'} = 1;
-                        $extra{'func.wrapped'}    = $1;
-                        last DETECT;
-                    }
-                }
-                $reason = "Can't find wrapper tag";
-            }
-        } # for alt
+        }
+        $reason = "Can't find any statement requiring Perinci::CmdLine".
+            " module family";
     }
 
-    [200, "OK", $yesno, {"func.reason"=>$reason, %extra}];
+    [200, "OK", $yesno, {"func.reason"=>$reason}];
 }
 
 1;
