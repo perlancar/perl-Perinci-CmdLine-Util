@@ -32,10 +32,23 @@ The criteria are:
 
 _
     args => {
-        script => {
+        filename => {
             summary => 'Path to file to be checked',
-            req => 1,
-            pos => 0,
+            schema => 'str*',
+            description => <<'_',
+
+Either `filename` or `string` must be specified.
+
+_
+        },
+        string => {
+            summary => 'Path to file to be checked',
+            schema => 'buf*',
+            description => <<'_',
+
+Either `file` or `string` must be specified.
+
+_
         },
         include_noexec => {
             summary => 'Include scripts that do not have +x mode bit set',
@@ -47,46 +60,63 @@ _
 sub detect_perinci_cmdline_script {
     my %args = @_;
 
-    my $script = $args{script} or return [400, "Please specify script"];
+    (defined($args{filename}) xor defined($args{string}))
+        or return [400, "Please specify either filename or string"];
     my $include_noexec  = $args{include_noexec}  // 1;
 
     my $yesno = 0;
     my $reason = "";
 
+    my $str = $args{string};
   DETECT:
     {
-        unless (-f $script) {
-            $reason = "Not a file";
-            last;
-        };
-        if (!$include_noexec && !(-x _)) {
-            $reason = "Not an executable";
-            last;
+        if (defined $args{filename}) {
+            my $fn = $args{filename};
+            unless (-f $fn) {
+                $reason = "'$fn' is not a file";
+                last;
+            };
+            if (!$include_noexec && !(-x _)) {
+                $reason = "'$fn' is not an executable";
+                last;
+            }
+            my $fh;
+            unless (open $fh, "<", $fn) {
+                $reason = "Can't be read";
+                last;
+            }
+            # for efficiency, we read a bit only here
+            read $fh, $str, 2;
+            unless ($str eq '#!') {
+                $reason = "Does not start with a shebang (#!) sequence";
+                last;
+            }
+            my $shebang = <$fh>;
+            unless ($shebang =~ /perl/) {
+                $reason = "Does not have 'perl' in the shebang line";
+                last;
+            }
+            seek $fh, 0, 0;
+            {
+                local $/;
+                $str = <$fh>;
+            }
         }
-        my $fh;
-        unless (open $fh, "<", $script) {
-            $reason = "Can't be read";
-            last;
-        }
-        read $fh, my($buf), 2;
-        unless ($buf eq '#!') {
+        unless ($str =~ /\A#!/) {
             $reason = "Does not start with a shebang (#!) sequence";
             last;
         }
-        my $shebang = <$fh>;
-        unless ($shebang =~ /perl/) {
+        unless ($str =~ /\A#!.*perl/) {
             $reason = "Does not have 'perl' in the shebang line";
             last;
         }
-        while (<$fh>) {
-            if (/^\s*(use|require)\s+Perinci::CmdLine(|::Any|::Lite)/) {
-                $yesno = 1;
-                last DETECT;
-            }
+        if ($str =~ /^\s*(use|require)\s+Perinci::CmdLine(|::Any|::Lite)/m) {
+            $yesno = 1;
+            last DETECT;
         }
         $reason = "Can't find any statement requiring Perinci::CmdLine".
             " module family";
-    }
+    } # DETECT
 
     [200, "OK", $yesno, {"func.reason"=>$reason}];
 }
@@ -94,7 +124,7 @@ sub detect_perinci_cmdline_script {
 1;
 # ABSTRACT: Utility routines related to Perinci::CmdLine
 
-=for Pod::Coverage ^(new)$
+=for Pod::Coverage ^()$
 
 =head1 SYNOPSIS
 
