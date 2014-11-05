@@ -1,5 +1,11 @@
 Revision history for Perinci-CmdLine-Util
 
+0.05    2014-11-05 (PERLANCAR)
+
+	- [Incompatible change] Change interface so the function can accept
+	  filename or string.
+
+
 0.04    2014-11-01 (PERLANCAR)
 
 	[REMOVED FEATURES]
