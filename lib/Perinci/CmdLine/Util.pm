@@ -13,6 +13,11 @@ our @EXPORT_OK = qw(detect_perinci_cmdline_script);
 
 our %SPEC;
 
+$SPEC{':package'} = {
+    v => 1.1,
+    summary => 'Utility routines related to Perinci::CmdLine',
+};
+
 $SPEC{detect_perinci_cmdline_script} = {
     v => 1.1,
     summary => 'Detect whether a file is a Perinci::CmdLine-based CLI script',
@@ -122,7 +127,7 @@ sub detect_perinci_cmdline_script {
 }
 
 1;
-# ABSTRACT: Utility routines related to Perinci::CmdLine
+# ABSTRACT:
 
 =for Pod::Coverage ^()$
 
