@@ -115,6 +115,10 @@ sub detect_perinci_cmdline_script {
             $reason = "Does not have 'perl' in the shebang line";
             last;
         }
+        if ($str =~ /^#\s*NO_PERINCI_CMDLINE_SCRIPT\s*$/m) {
+            $reason = "Marked with # NO_PERINCI_CMDLINE_SCRIPT directive";
+            last;
+        }
         if ($str =~ /^\s*(use|require)\s+Perinci::CmdLine(|::Any|::Lite)/m) {
             $yesno = 1;
             last DETECT;
