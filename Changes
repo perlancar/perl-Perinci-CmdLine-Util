@@ -1,5 +1,10 @@
 Revision history for Perinci-CmdLine-Util
 
+0.06    2014-12-27 (PERLANCAR)
+
+	- Respect # NO_PERINCI_CMDLINE_SCRIPT directive.
+
+
 0.05    2014-11-05 (PERLANCAR)
 
 	- [Incompatible change] Change interface so the function can accept
