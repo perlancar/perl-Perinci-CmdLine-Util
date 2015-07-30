@@ -36,6 +36,9 @@ The criteria are:
   something like `use Perinci::CmdLine`;
 
 _
+    args_rels => {
+        req_one => [qw/filename string/],
+    },
     args => {
         filename => {
             summary => 'Path to file to be checked',
@@ -45,6 +48,7 @@ _
 Either `filename` or `string` must be specified.
 
 _
+            pos => 0,
         },
         string => {
             summary => 'Path to file to be checked',
