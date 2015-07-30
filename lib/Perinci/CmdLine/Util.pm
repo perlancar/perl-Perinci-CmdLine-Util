@@ -76,6 +76,8 @@ sub detect_perinci_cmdline_script {
     my $yesno = 0;
     my $reason = "";
 
+    my $meta = {};
+
     my $str = $args{string};
   DETECT:
     {
@@ -123,15 +125,56 @@ sub detect_perinci_cmdline_script {
             $reason = "Marked with # NO_PERINCI_CMDLINE_SCRIPT directive";
             last;
         }
-        if ($str =~ /^\s*(use|require)\s+Perinci::CmdLine(|::Any|::Lite)/m) {
+        if ($str =~ /^\s*(use|require)\s+
+                     (Perinci::CmdLine(|::Any|::Lite|::Classic))\b/mx) {
             $yesno = 1;
+            $meta->{'func.module'} = $2;
+            last DETECT;
+        }
+        if ($str =~ /^# PERICMD_INLINE_SCRIPT: (.+)/m) {
+            $yesno = 1;
+            $meta->{'func.module'} = 'Perinci::CmdLine::Inline';
+            $meta->{'func.is_inline'} = 1;
+
+            my $pericmd_inline_attrs = $1;
+            my ($pericmd_inline_version) =
+                $str =~ /Perinci::CmdLine::Inline version ([0-9._]+)/;
+            $meta->{'func.notes'} //= [];
+            $meta->{'func.pericmd_inline_version'} = $pericmd_inline_version;
+            if (!$pericmd_inline_version) {
+                push @{ $meta->{'func.notes'} },
+                    "Can't detect version of Perinci::CmdLine::Inline version";
+            }
+            if ($pericmd_inline_version < 0.17) {
+                push @{ $meta->{'func.notes'} }, join(
+                    "",
+                    "Won't parse # PERICMD_INLINE_SCRIPT attributes ",
+                    "because prior to Perinci::CmdLine::Inline 0.17, ",
+                    "the attributes are dumped as Perl instead of JSON ",
+                    "so it's unsafe to parse",
+                );
+            } else {
+                require JSON;
+                eval { $pericmd_inline_attrs =
+                           JSON::decode_json($pericmd_inline_attrs) };
+                if ($@) {
+                    push @{ $meta->{'func.notes'} },
+                        "Can't parse # PERICMD_INLINE_SCRIPT attributes: $@";
+                } else {
+                    $meta->{'func.pericmd_inline_attrs'} =
+                        $pericmd_inline_attrs;
+                }
+            }
+
             last DETECT;
         }
         $reason = "Can't find any statement requiring Perinci::CmdLine".
             " module family";
     } # DETECT
 
-    [200, "OK", $yesno, {"func.reason"=>$reason}];
+    $meta->{'func.reason'} = $reason;
+
+    [200, "OK", $yesno, $meta];
 }
 
 1;
