@@ -154,9 +154,9 @@ sub detect_perinci_cmdline_script {
                     "so it's unsafe to parse",
                 );
             } else {
-                require JSON;
+                require JSON::MaybeXS;
                 eval { $pericmd_inline_attrs =
-                           JSON::decode_json($pericmd_inline_attrs) };
+                           JSON::MaybeXS::decode_json($pericmd_inline_attrs) };
                 if ($@) {
                     push @{ $meta->{'func.notes'} },
                         "Can't parse # PERICMD_INLINE_SCRIPT attributes: $@";
