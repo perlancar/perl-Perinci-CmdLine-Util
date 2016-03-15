@@ -1,5 +1,12 @@
 Revision history for Perinci-CmdLine-Util
 
+0.09    2016-03-16 (PERLANCAR)
+
+	- No functional changes.
+
+	- Replace JSON with JSON::MaybeXS.
+
+
 0.08    2015-09-03 (PERLANCAR)
 
 	- No functional changes.
