@@ -125,12 +125,21 @@ sub detect_perinci_cmdline_script {
             $reason = "Marked with # NO_PERINCI_CMDLINE_SCRIPT directive";
             last;
         }
-        if ($str =~ /^\s*(use|require)\s+
-                     (Perinci::CmdLine(|::Any|::Lite|::Classic))\b/mx) {
-            $yesno = 1;
-            $meta->{'func.module'} = $2;
-            last DETECT;
+
+        # NOTE: the presence of \s* pattern after ^ causes massive slowdown of
+        # the regex when we reach many thousands of lines, so we use split()
+
+        #if ($str =~ /^\s*(use|require)\s+
+        #    (Perinci::CmdLine(|::Any|::Lite|::Classic))/mx) {
+
+        for (split /^/, $str) {
+            if (/^\s*use\s+(Perinci::CmdLine(|::Any|::Lite|::Classic))\b/) {
+                $yesno = 1;
+                $meta->{'func.module'} = $2;
+                last DETECT;
+            }
         }
+
         if ($str =~ /^# PERICMD_INLINE_SCRIPT: (.+)/m) {
             $yesno = 1;
             $meta->{'func.module'} = 'Perinci::CmdLine::Inline';
