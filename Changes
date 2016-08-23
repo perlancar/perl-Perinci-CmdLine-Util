@@ -1,5 +1,11 @@
 Revision history for Perinci-CmdLine-Util
 
+0.11    2016-08-23 (PERLANCAR)
+
+	- [Bugfix][regression] Forgot to detect 'require Perinci::CmdLine'
+	  in addition to 'use Perinci::CmdLine'.
+
+
 0.10    2016-08-11 (PERLANCAR)
 
 	- [optimize] Avoid regex slowdown of detecting /^\s*use
