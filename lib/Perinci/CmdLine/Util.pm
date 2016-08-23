@@ -133,7 +133,7 @@ sub detect_perinci_cmdline_script {
         #    (Perinci::CmdLine(|::Any|::Lite|::Classic))/mx) {
 
         for (split /^/, $str) {
-            if (/^\s*use\s+(Perinci::CmdLine(|::Any|::Lite|::Classic))\b/) {
+            if (/^\s*(use|require)\s+(Perinci::CmdLine(|::Any|::Lite|::Classic))\b/) {
                 $yesno = 1;
                 $meta->{'func.module'} = $2;
                 last DETECT;
