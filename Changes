@@ -1,3 +1,11 @@
+0.12    2017-01-07 (PERLANCAR)
+
+	- [Incompatible change] Rename function
+	  detect_perinci_cmdline_script to detect_pericmd_script, we
+	  standardize on the shorter name (old name is still around but
+	  deprecated and undocumented).
+
+
 0.11    2016-08-23 (PERLANCAR)
 
 	- [Bugfix][regression] Forgot to detect 'require Perinci::CmdLine'
