@@ -1,5 +1,3 @@
-Revision history for Perinci-CmdLine-Util
-
 0.11    2016-08-23 (PERLANCAR)
 
 	- [Bugfix][regression] Forgot to detect 'require Perinci::CmdLine'
