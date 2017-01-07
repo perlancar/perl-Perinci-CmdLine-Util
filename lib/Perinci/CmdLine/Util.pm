@@ -9,7 +9,10 @@ use warnings;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(detect_perinci_cmdline_script);
+our @EXPORT_OK = qw(
+                       detect_pericmd_script
+                       detect_perinci_cmdline_script
+               );
 
 our %SPEC;
 
@@ -18,7 +21,7 @@ $SPEC{':package'} = {
     summary => 'Utility routines related to Perinci::CmdLine',
 };
 
-$SPEC{detect_perinci_cmdline_script} = {
+$SPEC{detect_pericmd_script} = {
     v => 1.1,
     summary => 'Detect whether a file is a Perinci::CmdLine-based CLI script',
     description => <<'_',
@@ -66,7 +69,7 @@ _
         },
     },
 };
-sub detect_perinci_cmdline_script {
+sub detect_pericmd_script {
     my %args = @_;
 
     (defined($args{filename}) xor defined($args{string}))
@@ -186,10 +189,16 @@ sub detect_perinci_cmdline_script {
     [200, "OK", $yesno, $meta];
 }
 
+{
+    no strict 'refs';
+    # old name, deprecated
+    *detect_perinci_cmdline_script = \&detect_pericmd_script;
+}
+
 1;
 # ABSTRACT:
 
-=for Pod::Coverage ^()$
+=for Pod::Coverage ^(detect_perinci_cmdline_script)$
 
 =head1 SYNOPSIS
 
