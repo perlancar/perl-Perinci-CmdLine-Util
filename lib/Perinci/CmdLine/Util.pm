@@ -171,10 +171,24 @@ sub detect_pericmd_script {
                            JSON::MaybeXS::decode_json($pericmd_inline_attrs) };
                 if ($@) {
                     push @{ $meta->{'func.notes'} },
-                        "Can't parse # PERICMD_INLINE_SCRIPT attributes: $@";
+                        "Can't parse # PERICMD_INLINE_SCRIPT line: $@";
                 } else {
                     $meta->{'func.pericmd_inline_attrs'} =
                         $pericmd_inline_attrs;
+                }
+            }
+
+            if ($str =~ /^# PERICMD_INLINE_SCRIPT_METAS: (.+)/m) {
+                my $pericmd_inline_metas = $1;
+                require JSON::MaybeXS;
+                eval { $pericmd_inline_metas =
+                           JSON::MaybeXS::decode_json($pericmd_inline_metas) };
+                if ($@) {
+                    push @{ $meta->{'func.notes'} },
+                        "Can't parse # PERICMD_INLINE_SCRIPT_METAS line: $@";
+                } else {
+                    $meta->{'func.pericmd_inline_metas'} =
+                        $pericmd_inline_metas;
                 }
             }
 
