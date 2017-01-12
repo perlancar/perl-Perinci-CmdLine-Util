@@ -1,3 +1,9 @@
+0.15    2017-01-12 (PERLANCAR)
+
+	- Adjust to Perinci::CmdLine::Inline 0.47 ('my %_pci_metas' changed
+	  to 'my $_pci_metas' line).
+
+
 0.14    2017-01-12 (PERLANCAR)
 
 	- Adjust to Perinci::CmdLine::Inline 0.45.
