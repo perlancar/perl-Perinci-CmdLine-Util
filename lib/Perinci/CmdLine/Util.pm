@@ -135,14 +135,6 @@ sub detect_pericmd_script {
         #if ($str =~ /^\s*(use|require)\s+
         #    (Perinci::CmdLine(|::Any|::Lite|::Classic))/mx) {
 
-        for (split /^/, $str) {
-            if (/^\s*(use|require)\s+(Perinci::CmdLine(|::Any|::Lite|::Classic))\b/) {
-                $yesno = 1;
-                $meta->{'func.module'} = $2;
-                last DETECT;
-            }
-        }
-
         if ($str =~ /^# PERICMD_INLINE_SCRIPT: (.+)/m) {
             $yesno = 1;
             $meta->{'func.module'} = 'Perinci::CmdLine::Inline';
@@ -178,14 +170,12 @@ sub detect_pericmd_script {
                 }
             }
 
-            if ($str =~ /^# PERICMD_INLINE_SCRIPT_METAS: (.+)/m) {
+            if ($str =~ /^my \%_pci_metas = \%\{ (.+) \};/m) {
                 my $pericmd_inline_metas = $1;
-                require JSON::MaybeXS;
-                eval { $pericmd_inline_metas =
-                           JSON::MaybeXS::decode_json($pericmd_inline_metas) };
+                eval "\$pericmd_inline_metas = $1";
                 if ($@) {
                     push @{ $meta->{'func.notes'} },
-                        "Can't parse # PERICMD_INLINE_SCRIPT_METAS line: $@";
+                        "Can't parse 'my %_pci_metas = ...' line: $@";
                 } else {
                     $meta->{'func.pericmd_inline_metas'} =
                         $pericmd_inline_metas;
@@ -194,6 +184,15 @@ sub detect_pericmd_script {
 
             last DETECT;
         }
+
+        for (split /^/, $str) {
+            if (/^\s*(use|require)\s+(Perinci::CmdLine(|::Any|::Lite|::Classic))\b/) {
+                $yesno = 1;
+                $meta->{'func.module'} = $2;
+                last DETECT;
+            }
+        }
+
         $reason = "Can't find any statement requiring Perinci::CmdLine".
             " module family";
     } # DETECT
