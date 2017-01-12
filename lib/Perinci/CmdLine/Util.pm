@@ -170,12 +170,12 @@ sub detect_pericmd_script {
                 }
             }
 
-            if ($str =~ /^my \%_pci_metas = \%\{ (.+) \};/m) {
+            if ($str =~ /^my \$_pci_metas = (.+);/m) {
                 my $pericmd_inline_metas = $1;
                 eval "\$pericmd_inline_metas = $1";
                 if ($@) {
                     push @{ $meta->{'func.notes'} },
-                        "Can't parse 'my %_pci_metas = ...' line: $@";
+                        "Can't parse 'my \$_pci_metas = ...' line: $@";
                 } else {
                     $meta->{'func.pericmd_inline_metas'} =
                         $pericmd_inline_metas;
